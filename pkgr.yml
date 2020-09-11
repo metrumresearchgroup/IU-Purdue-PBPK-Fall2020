@@ -1,0 +1,20 @@
+Version: 1
+
+Packages:
+  - tidyverse
+  - metrumrg
+  - yspec
+  - bitops
+  - caTools
+
+Repos:
+  - MPN: https://mpn.metworx.com/snapshots/stable/2020-08-15/
+
+Customizations:
+  Packages:
+  - metrumrg:
+      Suggests: true
+      
+Lockfile:
+    Type: renv
+
