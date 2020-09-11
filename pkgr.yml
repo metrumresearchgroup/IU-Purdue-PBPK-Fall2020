@@ -6,6 +6,12 @@ Packages:
   - yspec
   - bitops
   - caTools
+  - mrgsolve
+  - nloptr
+  - Runuran
+  - knitr
+  - kableExtra
+  - cowplot
 
 Repos:
   - MPN: https://mpn.metworx.com/snapshots/stable/2020-08-15/
