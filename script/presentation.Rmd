@@ -1,6 +1,6 @@
 ---
 title: "PBPK Modeling in R"
-author: "Ahmed Elmokadem"
+author: "Ahmed Elmokadem ahmede@metrumrg.com"
 date: ''
 output:
   html_document:
@@ -42,12 +42,15 @@ Example of open-source PBPK modeling and simulation software is PK-Sim/MoBi http
 
 - Open-source
 - Flexible
+- Large active community 
 - Ecosystem
     - Data manipulation
     - Plotting
     - Sensitivity analysis
     - Parameter estimation
-    - Version control
+    - Reproducibility: 
+        - version control (git, subversion)
+        - pkg management (pkgr https://github.com/metrumresearchgroup/pkgr, MPN https://mpn.metworx.com/docs/)
     - Dynamic/interactive presentations https://shiny.rstudio.com/gallery/
     - Cloud computing
 
@@ -61,9 +64,9 @@ Example of open-source PBPK modeling and simulation software is PK-Sim/MoBi http
 
 ![](https://media.giphy.com/media/PiQejEf31116URju4V/giphy.gif)
 
-## PBPK Modeling and Simulation
+## 1. PBPK Modeling and Simulation
 
-### mrgsolve
+### a. mrgsolve
 
 Elmokadem, Ahmed, Matthew M. Riggs, and Kyle T. Baron. 2019. “Quantitative Systems Pharmacology and Physiologically-Based Pharmacokinetic Modeling With Mrgsolve: A Hands-On Tutorial.” CPT: Pharmacometrics & Systems Pharmacology, October. https://doi.org/10.1002/psp4.12467.
 
@@ -78,7 +81,7 @@ library(nloptr)
 
 ```
 
-### Simple PBPK Model
+### b. Simple PBPK Model
 
 #### Model structure
 
@@ -114,7 +117,7 @@ $$\frac{dA_{lu}}{dt}=Q_{lu}(C_{ven} − \frac{C_{lu}}{\frac{Kp_{lu}}{BP}})$$
 
 ---
 
-### Voriconazole PBPK Model 
+### b. Voriconazole PBPK Model 
 
 #### References
 Zane NR, Thakker DR. A physiologically based pharmacokinetic model for voriconazole disposition predicts intestinal first-pass metabolism in children. Clin Pharmacokinet. 2014;53: 1171–1182 <br> https://link.springer.com/article/10.1007%2Fs40262-014-0181-y
@@ -395,9 +398,9 @@ gp
 
 ---
 
-## Sensitivity Analysis
+## 2. Sensitivity Analysis
 
-### Local
+### a. Local
 
 #### Graphical
 
@@ -511,7 +514,7 @@ ggplot(data=df_temp, aes(x=time, y=Coefficient, col=Parameter)) +
 
 ```
 
-### Global
+### b. Global
 
 Review sobol global sensitivity analysis from `sensitivity` package (https://cran.r-project.org/web/packages/sensitivity/index.html) <br> 
 Zhang, X-Y, M. N. Trame, L. J. Lesko, and S. Schmidt. 2015. “Sobol Sensitivity Analysis: A Tool to Guide the Development and Evaluation of Systems Pharmacology Models.” CPT: Pharmacometrics & Systems Pharmacology 4 (2): 69–79. https://ascpt.onlinelibrary.wiley.com/doi/full/10.1002/psp4.6 <br>
@@ -519,7 +522,7 @@ Vignette: https://github.com/mrgsolve/gallery/blob/master/application/sobol.md
 
 ---
 
-## Parameter Estimation
+## 3. Parameter Estimation
 
 Use package `nloptr` (https://cran.r-project.org/web/packages/nloptr/index.html) to optimize for most influential partition coefficient parameter and compare prediction before and after optimization to observed data. <br>
 For more background on optimization methods, check out Metrum's open science course MI210 https://metrumrg.com/course/mi210-essentials-population-pk-pd-modeling-simulation/
@@ -637,11 +640,11 @@ gp
 
 ---
 
-## Population simulations
+## 4. Population simulations
 
-### How to create a population?
+### a. How to create a population?
 
-Need to introduce interindividual variability in physiological parameters
+Need to introduce interindividual variability to physiological parameters
 
 Willmann, Stefan, Karsten Höhn, Andrea Edginton, Michael Sevestre, Juri Solodenko, Wolfgang Weiss, Jörg Lippert, and Walter Schmitt. 2007. “Development of a Physiology-Based Whole-Body Population Model for Assessing the Influence of Individual Variability on the Pharmacokinetics of Drugs.” Journal of Pharmacokinetics and Pharmacodynamics 34 (3): 401–31. https://pubmed.ncbi.nlm.nih.gov/17431751/
 
@@ -650,7 +653,7 @@ Willmann, Stefan, Karsten Höhn, Andrea Edginton, Michael Sevestre, Juri Soloden
 Meyer, Michaela, Sebastian Schneckener, Bernd Ludewig, Lars Kuepfer, and Joerg Lippert. 2012. “Using Expression Data for Quantification of Active Processes in Physiologically Based Pharmacokinetic Modeling.” Drug Metabolism and Disposition: The Biological Fate of Chemicals 40 (5): 892–901. https://pubmed.ncbi.nlm.nih.gov/22293118/
 
 
-### Simulation
+### b. Simulation
 
 Simulate a simple voriconazole dosing scenario for a population of 100 individuals, 50 males and 50 females, with ages ranging between 20-80, weights ranging between 50-100 kg and heights between 1.5 and 1.9 m. Use population saved in file `../data/derived/popPars_100.rds`
 
@@ -673,7 +676,7 @@ popPars2 <- lapply(1:length(popPars), function(i){
 # simulate
 modA2 <- mread("../model/voriPBPK2")
 Kpmu <- 0.56
-modA <- param(modA, Kpmu=Kpmu)
+modA2 <- param(modA2, Kpmu=Kpmu)
 
 #set simulation conditions
 bw   <- 73
@@ -721,7 +724,7 @@ gp
 
 
 
-### Parallelization
+### c. Parallelization
 
 Use the package `future.apply` to run the same population simulation over parallel cores. How long does it take compared to the single core simulation?
 
@@ -772,7 +775,7 @@ Check out the `mrgsim.parallel` package vignette: https://github.com/kylebaron/m
 
 ---
 
-## Shiny - Interactive Document
+## 5. Shiny - Interactive Document
 
 Explore the simple shiny app saved as `app.R`
 
