@@ -520,6 +520,8 @@ Review sobol global sensitivity analysis from `sensitivity` package (https://cra
 Zhang, X-Y, M. N. Trame, L. J. Lesko, and S. Schmidt. 2015. “Sobol Sensitivity Analysis: A Tool to Guide the Development and Evaluation of Systems Pharmacology Models.” CPT: Pharmacometrics & Systems Pharmacology 4 (2): 69–79. https://ascpt.onlinelibrary.wiley.com/doi/full/10.1002/psp4.6 <br>
 Vignette: https://github.com/mrgsolve/gallery/blob/master/application/sobol.md
 
+![](../doc/sobol_cmax.png){weight=50%}
+
 ---
 
 ## 3. Parameter Estimation
