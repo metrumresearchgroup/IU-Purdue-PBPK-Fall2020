@@ -12,7 +12,7 @@ output:
 
 ```{r, echo=F}
 # set chunk options
-knitr::opts_chunk$set(message = F, warning = F, echo = F)
+knitr::opts_chunk$set(message = F, warning = F, echo = T)
 ```
 
 ---
@@ -75,9 +75,6 @@ Elmokadem, Ahmed, Matthew M. Riggs, and Kyle T. Baron. 2019. “Quantitative Sys
 # load libraries
 library(tidyverse)
 library(mrgsolve)
-library(FME)
-library(sensitivity)
-library(nloptr)
 
 ```
 
@@ -147,7 +144,7 @@ modA <- mread("../model/voriPBPK")
 
 ```{r}
 
-source("CalcKp_P&T.R")
+source("calcKp_PT.R")
 
 #voriconazole physicochemical properties
 logP <- 2.56  #lipophilicity
@@ -457,6 +454,8 @@ What is the most influential parameter?
 
 ```{r}
 
+library(FME)
+
 ### sensitivity analysis
 #set a list of the candidate parameters
 parms <- list(Kpad = 9.89, Kpbo = 7.91, Kpbr = 7.35, Kpgu = 5.82, Kphe = 1.95, Kpki = 2.9, Kpli = 4.66, Kplu = 0.83, Kpmu = 2.94, Kpsp = 2.96) 
@@ -530,6 +529,8 @@ Use package `nloptr` (https://cran.r-project.org/web/packages/nloptr/index.html)
 For more background on optimization methods, check out Metrum's open science course MI210 https://metrumrg.com/course/mi210-essentials-population-pk-pd-modeling-simulation/
 
 ```{r}
+
+library(nloptr)
 
 ### optimization with maximum likelihood method
 theta <- log(c(Kpmu=2.94, sigma=1))  #initial parameter for MLE; mean and variance
@@ -646,7 +647,7 @@ gp
 
 ### a. How to create a population?
 
-Need to introduce interindividual variability to physiological parameters
+Need to introduce interindividual variability to *physiological* parameters
 
 Willmann, Stefan, Karsten Höhn, Andrea Edginton, Michael Sevestre, Juri Solodenko, Wolfgang Weiss, Jörg Lippert, and Walter Schmitt. 2007. “Development of a Physiology-Based Whole-Body Population Model for Assessing the Influence of Individual Variability on the Pharmacokinetics of Drugs.” Journal of Pharmacokinetics and Pharmacodynamics 34 (3): 401–31. https://pubmed.ncbi.nlm.nih.gov/17431751/
 
@@ -657,7 +658,7 @@ Meyer, Michaela, Sebastian Schneckener, Bernd Ludewig, Lars Kuepfer, and Joerg L
 
 ### b. Simulation
 
-Simulate a simple voriconazole dosing scenario for a population of 100 individuals, 50 males and 50 females, with ages ranging between 20-80, weights ranging between 50-100 kg and heights between 1.5 and 1.9 m. Use population saved in file `../data/derived/popPars_100.rds`
+1. Simulate a simple voriconazole dosing scenario for a population of 100 individuals, 50 males and 50 females, with ages ranging between 20-80, weights ranging between 50-100 kg and heights between 1.5 and 1.9 m. Use population saved in file `../data/derived/popPars_100.rds`
 
 ```{r}
 
@@ -665,6 +666,7 @@ Simulate a simple voriconazole dosing scenario for a population of 100 individua
 popPars <- readRDS("../data/derived/popPars_100.rds")
 
 # add IIV on ka and CL/VmaxH
+set.seed(192898)
 iVmaxH <- rlnorm(100, meanlog=log(40), sdlog=0.2)
 ika <- rlnorm(100, meanlog=log(0.849), sdlog=0.2)
 
@@ -688,20 +690,26 @@ cmt  <- "VEN"
 ii   <- 12
 addl <- 13
 ss   <- 1
+delta <- 0.1
+end <- 12
+
+# prepare simulation dataset
+idata <- popPars2 %>% bind_rows()
+
+e <- ev(amt=amt, cmt=cmt, ii=ii, addl=addl, rate=rate, ss=ss)
+
+data <- e %>% 
+  as_tibble %>% 
+  bind_cols(idata) %>%
+  mutate(amt = 4*BW, rate = 4*BW) %>%
+  select(ID, everything())
 
 #run simulation
-system.time(sims <- lapply(1:length(popPars2), function(i){
-  sim <- modA2 %>% 
-    param(popPars[[i]]) %>%
-    ev(amt=amt, cmt=cmt, ii=ii, addl=addl, rate=rate, ss=ss) %>% 
-    mrgsim(delta = 0.1, end = 12, obsonly=T, outvars = c("CP")) %>% 
-    filter(row_number() != 1) %>%
-    mutate(ID = i)
-  return(sim)
-}) %>%
-  bind_rows()) 
- 
-# get summary stats for population
+system.time(sims <- modA2 %>% 
+  mrgsim_d(data=data, delta = delta, end = end, obsonly=T, outvars = c("CP")) %>% 
+  filter(row_number() != 1))
+
+# get summary stats for population prediction
 hi95 <- function(x) quantile(x, probs = c(0.95))
 lo05 <- function(x) quantile(x, probs = c(0.05))
 
@@ -724,31 +732,134 @@ gp
 
 ```
 
+2. Use `PKNCA` package to calculate summary statistics for the population
+
+```{r}
+
+library(PKNCA)
+
+# get PKNCA object
+data_nca <- data %>%
+  select(ID, time, amt, rate)
+
+# create dose object
+dose_obj <-
+  PKNCAdose(
+    data,
+    amt~time|ID
+  )
+
+# create conc object
+conc_obj <-
+  PKNCAconc(
+    sims,
+    CP~time|ID
+  )
+
+# combine
+data_obj <- PKNCAdata(conc_obj, dose_obj)
+
+## Calculate the NCA parameters
+results_obj <- pk.nca(data_obj)
+
+## Summarize the results
+summary(results_obj)
+
+```
+
+
+3. Compare doses 3 and 4 mg/kg for adults. Which dose keeps voriconazole concentration at steady state above MIC (1 mg/L) for >= 90% of subjects?
+
+```{r}
+
+library(cowplot)
+library(kableExtra)
+
+data_3mg <- e %>% 
+  as_tibble %>% 
+  bind_cols(idata) %>%
+  mutate(amt = 3*BW, rate = 3*BW) %>%
+  select(ID, everything())
+
+#run simulation
+sims_3mg <- modA2 %>% 
+  mrgsim_d(data=data_3mg, delta = delta, end = end, obsonly=T, outvars = c("CP")) %>% 
+  filter(row_number() != 1)
+
+sims2_3mg <- sims_3mg %>%
+  group_by(time) %>%
+  mutate(loCP = lo05(CP),
+         medCP = median(CP),
+         hiCP = hi95(CP)) %>%
+  ungroup() %>%
+  filter(ID == first(ID))
+
+#plot population predictions 
+gp_3mg <- ggplot(data = sims2_3mg, aes(x=time)) + 
+  geom_line(aes(y=medCP), col="black") +
+  geom_ribbon(aes(ymin=loCP, ymax=hiCP), alpha = 0.5) +
+  scale_y_continuous(trans = "log10") +
+  labs(title="Population simulation (3 mg/kg)", x="time (h)", y="Plasma concentration (mg/L)") +
+  theme_bw() + 
+  geom_hline(aes(yintercept = 1), lty=2) +
+  ylim(c(0.1,7))
+
+gp_4mg <- gp + 
+  labs(title="Population simulation (4 mg/kg)", x="time (h)", y="Plasma concentration (mg/L)") +
+  geom_hline(aes(yintercept = 1), lty=2) +
+  ylim(c(0.1,7)) 
+
+gp_34 <- plot_grid(gp_3mg, gp_4mg, ncol=2) 
+gp_34
+
+# calculate stats
+stats_4mg <- sims %>%
+  filter(time != 0) %>%
+  group_by(ID) %>%
+  mutate(Cmin = min(CP)) %>%
+  slice(1) %>%
+  ungroup() %>%
+  mutate(FLG = ifelse(Cmin < 1, 1, 0))
+percLow_4mg <- (nrow(stats_4mg[stats_4mg$FLG==1,]) / nrow(stats_4mg)) * 100
+
+stats_3mg <- sims_3mg %>%
+  filter(time != 0) %>%
+  group_by(ID) %>%
+  mutate(Cmin = min(CP)) %>%
+  slice(1) %>%
+  ungroup() %>%
+  mutate(FLG = ifelse(Cmin < 1, 1, 0))
+percLow_3mg <- (nrow(stats_3mg[stats_3mg$FLG==1,]) / nrow(stats_3mg)) * 100 
+
+stats_df <- tibble(Dose = c("3 mg/kg","4 mg/kg"),
+                   `Percent of subjects with SS Cmin < MIC` = c(percLow_3mg, percLow_4mg))
+
+stats_df %>%
+  knitr::kable() %>%
+  kable_styling()
+
+```
 
 
 ### c. Parallelization
 
-Use the package `future.apply` to run the same population simulation over parallel cores. How long does it take compared to the single core simulation?
+Use the package `mrgsim.apply` (vignette: https://github.com/kylebaron/mrgsim.parallel) to run the same population simulation over parallel cores. How long does it take compared to the single core simulation?
 
 ```{r}
 
-Sys.setenv(R_LIBS = "../renv/library")
+#Sys.setenv(R_LIBS = "../renv/library")
 library(parallel)
-library(future.apply)
-plan(multisession, workers = 5)
+library(future)
+library(mrgsim.parallel)
+
+# set parallelization options
+options(future.fork.enable=TRUE, mc.cores = 6L)
+plan(multiprocess, workers = 6L)
 
 #run simulation
-system.time(sims <- future_lapply(1:length(popPars2), function(i){
-  loadso(modA2)
-  sim <- modA2 %>% 
-    param(popPars[[i]]) %>%
-    ev(amt=amt, cmt=cmt, ii=ii, addl=addl, rate=rate, ss=ss) %>% 
-    mrgsim(delta = 0.1, end = 12, obsonly=T, outvars = c("CP")) %>% 
-    filter(row_number() != 1) %>%
-    mutate(ID = i)
-  return(sim)
-}) %>%
-  bind_rows()) 
+system.time(sims <- modA2 %>% 
+  future_mrgsim_d(data=data, nchunk = 6L, delta = delta, end = end, obsonly=T, outvars = c("CP")) %>% 
+  filter(row_number() != 1))
  
 # get summary stats for population
 hi95 <- function(x) quantile(x, probs = c(0.95))
@@ -772,8 +883,6 @@ gp <- ggplot(data = sims2, aes(x=time)) +
 gp
 
 ```
-
-Check out the `mrgsim.parallel` package vignette: https://github.com/kylebaron/mrgsim.parallel
 
 ---
 

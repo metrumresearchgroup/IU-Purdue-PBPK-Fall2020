@@ -16,9 +16,12 @@ Packages:
   - sensitivity
   - shiny
   - future.apply
+  - PKNCA
+  - mrgsim.parallel
   
 Repos:
   - MPN: https://mpn.metworx.com/snapshots/stable/2020-09-20/
+  - CRAN: https://cran.rstudio.com
 
 Customizations:
   Packages:
