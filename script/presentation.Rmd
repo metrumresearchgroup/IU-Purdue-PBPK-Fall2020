@@ -42,8 +42,9 @@ Example of open-source PBPK modeling and simulation software is PK-Sim/MoBi http
 
 - Open-source
 - Flexible
+- Platform free
 - Large active community 
-- Ecosystem
+- Integrated ecosystem that allows end-to-end analysis
     - Data manipulation
     - Plotting
     - Sensitivity analysis
