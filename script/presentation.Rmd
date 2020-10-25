@@ -38,12 +38,12 @@ Example of open-source PBPK modeling and simulation software is PK-Sim/MoBi http
 
 ---
 
-# Why R?
+# Why R/mrgsolve?
 
 - Open-source
-- Flexible
+- Flexible (easy integration - compartments, QSP, PDEs, etc..)
 - Platform free
-- Large active community 
+- Large active community (packages, troubleshooting - stackoverflow is your friend https://stackoverflow.com/)
 - Integrated ecosystem that allows end-to-end analysis
     - Data manipulation
     - Plotting
@@ -52,8 +52,8 @@ Example of open-source PBPK modeling and simulation software is PK-Sim/MoBi http
     - Reproducibility: 
         - version control (git, subversion)
         - pkg management (pkgr https://github.com/metrumresearchgroup/pkgr, MPN https://mpn.metworx.com/docs/)
+    - Parallelization (local machine, cluster, or cloud)
     - Dynamic/interactive presentations https://shiny.rstudio.com/gallery/
-    - Cloud computing
 
 ![](../doc/ecosystem.png){width=75%}
 
@@ -65,7 +65,13 @@ Example of open-source PBPK modeling and simulation software is PK-Sim/MoBi http
 
 ![](https://media.giphy.com/media/PiQejEf31116URju4V/giphy.gif)
 
-## 1. PBPK Modeling and Simulation
+## 1. Playing with R and tidyverse
+
+Open a new Rscript file and play a little with R and the package tidyverse..
+
+---
+
+## 2. PBPK Modeling and Simulation
 
 ### a. mrgsolve
 
@@ -396,7 +402,7 @@ gp
 
 ---
 
-## 2. Sensitivity Analysis
+## 3. Sensitivity Analysis
 
 ### a. Local
 
@@ -524,7 +530,7 @@ Vignette: https://github.com/mrgsolve/gallery/blob/master/application/sobol.md
 
 ---
 
-## 3. Parameter Estimation
+## 4. Parameter Estimation
 
 Use package `nloptr` (https://cran.r-project.org/web/packages/nloptr/index.html) to optimize for most influential partition coefficient parameter and compare prediction before and after optimization to observed data. <br>
 For more background on optimization methods, check out Metrum's open science course MI210 https://metrumrg.com/course/mi210-essentials-population-pk-pd-modeling-simulation/
@@ -644,7 +650,7 @@ gp
 
 ---
 
-## 4. Population simulations
+## 5. Population simulations
 
 ### a. How to create a population?
 
@@ -887,7 +893,7 @@ gp
 
 ---
 
-## 5. Shiny - Interactive Document
+## 6. Shiny - Interactive Document
 
 Explore the simple shiny app saved as `app.R`
 
