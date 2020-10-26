@@ -18,6 +18,7 @@ Packages:
   - future.apply
   - PKNCA
   - mrgsim.parallel
+  - numDeriv
   
 Repos:
   - MPN: https://mpn.metworx.com/snapshots/stable/2020-09-20/

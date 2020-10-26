@@ -21,7 +21,7 @@ knitr::opts_chunk$set(message = F, warning = F, echo = T)
 
 ## A Little Story..
 
-<font face = "Brush Script MT" size =" 5">Once upon a time, there was a young, naive and yet brilliant, scientist, who had a thought..
+<font face = "Brush Script MT" size =" 7">Once upon a time, there was a young, naive and yet brilliant, scientist, who had a thought..
 
 ![](../doc/dexter.png){width=50%}
 
@@ -532,12 +532,15 @@ Vignette: https://github.com/mrgsolve/gallery/blob/master/application/sobol.md
 
 ## 4. Parameter Estimation
 
-Use package `nloptr` (https://cran.r-project.org/web/packages/nloptr/index.html) to optimize for most influential partition coefficient parameter and compare prediction before and after optimization to observed data. <br>
-For more background on optimization methods, check out Metrum's open science course MI210 https://metrumrg.com/course/mi210-essentials-population-pk-pd-modeling-simulation/
+- Use package `nloptr` (https://cran.r-project.org/web/packages/nloptr/index.html) to optimize for most influential partition coefficient parameter and compare prediction before and after optimization to observed data <br>
+- Use package `numDeriv` to generate the 95% CI around the parameter estimates <br>
+- For more background on optimization methods, check out Metrum's open science course MI210 https://metrumrg.com/course/mi210-essentials-population-pk-pd-modeling-simulation/
 
 ```{r}
 
 library(nloptr)
+library(numDeriv)
+library(kableExtra)
 
 ### optimization with maximum likelihood method
 theta <- log(c(Kpmu=2.94, sigma=1))  #initial parameter for MLE; mean and variance
@@ -595,6 +598,25 @@ p <- as.list(exp(fit$par))  #get the parameters on the linear scale
 names(p) <- names(theta)
 p
 
+# get standard error and confidence intervals around the estimated parameters
+h <- hessian(OF, fit$par)
+vc_log <- solve(h)  #variance-covariance matrix
+SE_log <- sqrt(diag(vc_log))  #standard error on log scale
+
+# create dataframe with parameter summary
+sig <- function(x) signif(x, 3)
+paramSumm <- tibble(Parameter = names(theta),
+                    Estimate = exp(fit$par),
+                    lb = exp(fit$par - (1.96 * SE_log)),
+                    ub = exp(fit$par + (1.96 * SE_log))) %>%
+  mutate(`Estimate (95% CI)` = paste0(sig(Estimate), " (", sig(lb), ", ", sig(ub), ")")) %>%
+  select(Parameter, `Estimate (95% CI)`)
+
+paramSumm %>%
+  knitr::kable() %>%
+  kable_styling()
+
+# compare initial predictions to those using the optimized parameters
 predB4 <- OF(theta, pred=T)
 predAfter <- OF(fit$par, pred=T)
 
@@ -780,7 +802,6 @@ summary(results_obj)
 ```{r}
 
 library(cowplot)
-library(kableExtra)
 
 data_3mg <- e %>% 
   as_tibble %>% 
@@ -897,4 +918,9 @@ gp
 
 Explore the simple shiny app saved as `app.R`
 
+---
+
+<font face = "Brush Script MT" size =" 7">..and this is why modeling PBPK in R beats anything else..</font>
+
+![](https://media.giphy.com/media/wrKbZmYC2IQ92/giphy.gif)
 
