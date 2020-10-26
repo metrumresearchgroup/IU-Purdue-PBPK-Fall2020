@@ -533,7 +533,7 @@ Vignette: https://github.com/mrgsolve/gallery/blob/master/application/sobol.md
 ## 4. Parameter Estimation
 
 - Use package `nloptr` (https://cran.r-project.org/web/packages/nloptr/index.html) to optimize for most influential partition coefficient parameter and compare prediction before and after optimization to observed data <br>
-- Use package `numDeriv` to generate the 95% CI around the parameter estimates <br>
+- Use package `numDeriv` (https://cran.r-project.org/web/packages/numDeriv/index.html) to generate the 95% CI around the parameter estimates <br>
 - For more background on optimization methods, check out Metrum's open science course MI210 https://metrumrg.com/course/mi210-essentials-population-pk-pd-modeling-simulation/
 
 ```{r}
@@ -631,6 +631,10 @@ gp
 
 ```
 
+check out:
+
+- vignette for MAP Bayes parameter estimation: https://mrgsolve.github.io/blog/map_bayes.html 
+- `nlmixr` package for nonlinear mixed effects modeling https://github.com/nlmixrdevelopment/nlmixr
 
 Simulate a 4 mg/kg voriconazole IV infusion dosing in a male child subject infused at a rate of 3 mg/kg/h twice a day for seven days. Compare the steady state prediction before and after optimization to the observed data in `Pediatric_IV.csv`.
 
