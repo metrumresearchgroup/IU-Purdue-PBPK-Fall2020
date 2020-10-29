@@ -61,6 +61,12 @@ Example of open-source PBPK modeling and simulation software is PK-Sim/MoBi http
 
 ---
 
+# General PBPK Workflow
+
+![](../doc/workflow.png){width=75%}
+
+---
+
 # Let's Start Coding..
 
 ![](https://media.giphy.com/media/PiQejEf31116URju4V/giphy.gif)
@@ -137,7 +143,7 @@ Utsey, Kiersten, Madeleine S. Gastonguay, Sean Russell, Reed Freling, Matthew M.
 
 #### Tasks
 
-**Note:** for the following tasks use `script.R` chunks 3-?.
+**Note:** for the following tasks use `script.R`
 
 1. Explore and compile typical adult male PBPK model `../model/voriPBPK.cpp` 
 
