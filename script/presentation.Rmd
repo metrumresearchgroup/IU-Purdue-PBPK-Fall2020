@@ -1,5 +1,5 @@
 ---
-title: "PBPK Modeling in R"
+title: "PBPK Modeling with R/mrgsolve"
 author: "Ahmed Elmokadem ahmede@metrumrg.com"
 date: ''
 output:
