@@ -1,4 +1,4 @@
-//Voriconazole PBPK model for a typical adult male
+//Voriconazole PBPK model for a typical adult male ; modified for population simulation
 
 [PARAM] 
 //Tissue volumes (L); source: https://www.ncbi.nlm.nih.gov/pubmed/14506981
