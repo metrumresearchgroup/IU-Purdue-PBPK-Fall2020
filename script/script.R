@@ -865,6 +865,7 @@ gp
 
 # Explore the simple shiny app saved as `app.R`
 
+library(shiny)
 runApp("app.R")
 
 ################################################################################
