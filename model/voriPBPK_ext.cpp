@@ -122,7 +122,7 @@ double CLrenal = 0.096; //(L/hr)
 // double Peff = fperm*A*((pow(MW_eff,(-alpha-beta))*MA)/(pow(MW_eff,(-alpha)) + B*pow(MW_eff,(-beta))*MA) * 1e-2 * 3600);  //(m/h) intestinal permeability 
 // double kd = fdis*Peff*SA_abs*1000/VguLumen;  //(h-1) rate constant for drug disappearing from lumen and into enterocytes
 // double ka = fabs*Peff*SA_basal*1000/VguWall; //(h-1) rate constant for drug absorption from enterocytes to gut circulation
-double kt = 1 / ITT;  //(h-1) intestinal transit rate constatnt
+double kt = 1 / ITT;  //(h-1) intestinal transit rate constant
 
 
 $ODE
