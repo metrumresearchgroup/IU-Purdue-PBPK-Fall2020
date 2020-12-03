@@ -702,10 +702,6 @@ gp
 
 library(PKNCA)
 
-# get PKNCA object
-data_nca <- data %>%
-  select(ID, time, amt, rate)
-
 # create dose object
 dose_obj <-
   PKNCAdose(
