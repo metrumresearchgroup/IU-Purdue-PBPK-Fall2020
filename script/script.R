@@ -761,16 +761,15 @@ sims2_3mg <- sims_3mg %>%
 gp_3mg <- ggplot(data = sims2_3mg, aes(x=time)) + 
   geom_line(aes(y=medCP), col="black") +
   geom_ribbon(aes(ymin=loCP, ymax=hiCP), alpha = 0.5) +
-  scale_y_continuous(trans = "log10") +
+  scale_y_continuous(trans = "log10", limits=c(0.3,7)) +
   labs(title="Population simulation (3 mg/kg)", x="time (h)", y="Plasma concentration (mg/L)") +
   theme_bw() + 
-  geom_hline(aes(yintercept = 1), lty=2) +
-  ylim(c(0.1,7))
+  geom_hline(aes(yintercept = 1), lty=2) 
 
 gp_4mg <- gp + 
   labs(title="Population simulation (4 mg/kg)", x="time (h)", y="Plasma concentration (mg/L)") +
   geom_hline(aes(yintercept = 1), lty=2) +
-  ylim(c(0.1,7)) 
+  scale_y_continuous(trans = "log10", limits=c(0.3,7))
 
 gp_34 <- plot_grid(gp_3mg, gp_4mg, ncol=2) 
 gp_34
